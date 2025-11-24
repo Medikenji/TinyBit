@@ -1,0 +1,3 @@
+namespace tiny_bit {
+
+}
