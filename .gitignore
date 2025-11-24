@@ -2,7 +2,6 @@
 *
 
 #Except these
-!*/.git
 !.gitignore
 !.gitattributes
 !tiny_bit.h
