@@ -1,7 +1,9 @@
+/*
+ * tiny_bit.h is a small, lightweight, single-header compression library.
+ * Its purpose is to help storing smaller bits into one big chunk of bits
+ */
 #ifndef TINY_BIT_IMPLEMENTATION
 #define TINY_BIT_IMPLEMENTATION
-
-
 #include <unordered_map>
 
 /*
@@ -12,6 +14,10 @@
 
 namespace tiny_bit {
 
+    ///Encodes the bits of _value into _data.
+    /// This means that _data should always be bigger than _value
+    /// offset: should be how many bits to the RIGHT the value should be placed.
+    /// sizeInBits: should be the size in bits.
     void _encode(int &_data, int _offsetInBits, int _sizeInBits, int _value ) {
         int mask = 0;
         for (int i = 0; i < _sizeInBits; i++) {
@@ -23,6 +29,9 @@ namespace tiny_bit {
         _data |= _value;
     }
 
+    /// Decodes/Extracts a value out of the data.
+    /// offset: should be how many bits to the RIGHT the value is placed.
+    /// sizeInBits: should be the size in bits.
     static int _decode(int _data, int _offsetInBits, int _sizeInBits) {
         int mask = 0;
         for (int i = 0; i < _sizeInBits; i++) {
@@ -35,6 +44,7 @@ namespace tiny_bit {
 
 
 
+    /// Property is a small struct that holds all of the need information about a property of a registered object.
     struct Property {
         int size : 8;
         int offset : 8;
@@ -42,10 +52,11 @@ namespace tiny_bit {
     };
 
 
-
+    /// RegisteredObject is a small class that holds all of the need information about a registered object.
     class RegisteredObject {
     public:
 
+        ///Registers and processes all of the needed information about a field/property of a object.
         template<typename T, typename M>
         RegisteredObject& property(M T::* member, int size_in_bits) {
             _properties.push_back(Property{
@@ -56,13 +67,15 @@ namespace tiny_bit {
             return *this;
         }
 
+        /// Returns a non-changeable vector to iterate through.
         const std::vector<Property>& properties() const {
             return _properties;
         }
 
     private:
+        std::vector<Property> _properties;
 
-
+        /// Returns the offset/position for the next property.
         int get_offset() const {
             int offset = 0;
 
@@ -73,6 +86,7 @@ namespace tiny_bit {
             return offset;
         }
 
+        ///  Returns the total size of this object.
         int get_size() const {
             int size = 0;
 
@@ -83,11 +97,12 @@ namespace tiny_bit {
             return size;
         }
 
-        std::vector<Property> _properties;
     };
 
 
+    /// ONLY TINY_BIT SHOULD ACCESS THIS! DO NOT TOUCH!
     static std::unordered_map<size_t, RegisteredObject*> __registry;
+
     typedef std::unordered_map<size_t, RegisteredObject*>::iterator __iterator;
 
     template<typename T>
